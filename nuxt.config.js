@@ -34,6 +34,8 @@ export default {
     '@nuxtjs/tailwindcss'
   ],
 
+  router: { base: '/semovies/' },
+
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
     // https://go.nuxtjs.dev/axios
