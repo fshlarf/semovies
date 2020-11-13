@@ -49,4 +49,15 @@ html {
   }
 }
 
+button:disabled,
+button[disabled]{
+  background-color: #cccccc;
+}
+
+button[disabled]:hover{
+  background-color: #cccccc;
+  cursor: unset;
+}
+
+
 </style>
