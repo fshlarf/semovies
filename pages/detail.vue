@@ -21,7 +21,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import axios from 'axios'
 import { defineComponent, reactive, onMounted } from '@vue/composition-api'
 import Header from "~/components/organisms/Header"

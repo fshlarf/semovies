@@ -1,73 +1,84 @@
 <template>
   <div>
-    <Header/>
-    <div class="movies">
-      <div class="movies-panel col-span-6 sm:col-span-3 py-10">
-        <div class="movies-panel__search">
-          <p>Search</p>
-          <input v-model="paramSearch" id="search" class="border rounded border-gray-400 mt-1 py-2 px-2" placeholder="Example: Iron man">
-          <Button
-            btnTitle="Search"
-            @btn-click="clickSearch"
-          />
-        </div>
-        <div class="movies-panel__filter">
-          <FilterElement
-            :filterYear="state.filterYear"
-            @input-filter-year="state.filterYear = arguments[0]"
-            @filter-click="executeFilter"
-            @click-genre="chooseGenre"
-          />
-        </div>
-      </div>
-      <div class="movies-list">
-        <div class="desktop">
-          <div class="card" v-for="movie in state.dataMovies" :key="movie.id" @click="openDetail(movie)">
-            <img :src="movie.poster_path ? `http://image.tmdb.org/t/p/w500/${movie.poster_path}` : '/semovies-id/images/not-found.png'" :alt="movie.poster_path">
-            <div class="card-title">{{ movie.title }} ({{ setYearRelease(movie.release_date) }})</div>
+    <div v-if="!isLoggedIn">
+      <HomepageBeforeLoggedin
+        @click-login="clickLogin"
+      />
+    </div>
+    <div v-else>
+      <Header/>
+      <div class="movies">
+        <div class="movies-panel col-span-6 sm:col-span-3 py-10">
+          <div class="movies-panel__search">
+            <p>Search</p>
+            <input v-model="paramSearch" id="search" class="border rounded border-gray-400 mt-1 py-2 px-2" placeholder="Example: Iron man">
+            <Button
+              btnTitle="Search"
+              @btn-click="clickSearch"
+            />
+          </div>
+          <div class="movies-panel__filter">
+            <FilterElement
+              :filterYear="state.filterYear"
+              @input-filter-year="state.filterYear = arguments[0]"
+              @filter-click="executeFilter"
+              @click-genre="chooseGenre"
+            />
           </div>
         </div>
-        <Button
-          btnTitle="More"
-          @btn-click="clickMore"
-          btnClass="movies-btn"
-          :disabled="state.disableBtnMore"
-        />
+        <div class="movies-list">
+          <div class="desktop">
+            <div class="card" v-for="movie in dataMovies" :key="movie.id" @click="openDetail(movie)">
+              <img :src="movie.poster_path ? `http://image.tmdb.org/t/p/w500/${movie.poster_path}` : '/semovies-id/images/not-found.png'" :alt="movie.poster_path">
+              <div class="card-title">{{ movie.title }} ({{ setYearRelease(movie.release_date) }})</div>
+            </div>
+          </div>
+          <Button
+            btnTitle="More"
+            @btn-click="clickMore"
+            btnClass="movies-btn"
+            :disabled="disableBtnMore"
+          />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import Vue from 'vue'
 import axios from 'axios'
 import { defineComponent, reactive, watchEffect, onMounted, ref } from '@vue/composition-api'
+import Button from "~/components/atoms/Button"
 import FilterElement from "~/components/mollecules/FilterElement"
 import Header from "~/components/organisms/Header"
-import Button from "~/components/atoms/Button"
+import HomepageBeforeLoggedin from "~/components/organisms/HomepageBeforeLoggedin"
 
 export default defineComponent({
   setup(_, ctx) {
+    const dummyUser = {username: 'hello',password: 'hello123'}
     const state = reactive({
       page: 1,
       year: '2020',
       sortBy: 'popularity.desc',
-      dataMovies: [],
       totalPages: null,
-      tempDataMovies: [],
-      disableBtnMore: false,
-      useFilter: false,
       filterYear: '',
       filterGenreById: '',
     })
 
+    const API_KEY = 'eb9ff522676fd1e57fbd5f7ebd4fe38d'
+    const urlDiscover = 'https://api.themoviedb.org/3/discover/movie'
+    const urlSearch = 'https://api.themoviedb.org/3/search/movie'
+    const dataMovies = ref([])
     const router = ctx.root.$router
     const paramSearch = ref('')
+    const useFilter = ref(false)
+    const disableBtnMore = ref(false)
+    const isLoggedIn = ref(false)
 
     const getDataMovies = async () => {
       try {
         const res = await axios.get(setEndpointParam(state))
-        res.data.results.forEach(e => {state.dataMovies.push(e)})
+        res.data.results.forEach(e => {dataMovies.value.push(e)})
         state.totalPages = res.data.total_pages
       } catch (err) {
         console.log(err)
@@ -75,15 +86,15 @@ export default defineComponent({
     }
 
     const setEndpointParam = (val) => {
-      let { sortBy, page, year, useFilter, filterYear, filterGenreById } = val
-      if (!useFilter) {
+      let { sortBy, page, year, filterYear, filterGenreById } = val
+      if (!useFilter.value) {
         let url = paramSearch.value == '' ? 
-          `https://api.themoviedb.org/3/discover/movie?api_key=eb9ff522676fd1e57fbd5f7ebd4fe38d&language=en-US&sort_by=${sortBy}&page=${page}&release_date.gte=${year}`
+          `${urlDiscover}?api_key=${API_KEY}&language=en-US&sort_by=${sortBy}&page=${page}&release_date.gte=${year}`
           :
-          `https://api.themoviedb.org/3/search/movie?api_key=eb9ff522676fd1e57fbd5f7ebd4fe38d&query=${paramSearch.value}&page=${page}`
+          `${urlSearch}?api_key=${API_KEY}&query=${paramSearch.value}&page=${page}`
         return url
       } else {
-        let url = `https://api.themoviedb.org/3/discover/movie?api_key=eb9ff522676fd1e57fbd5f7ebd4fe38d&language=en-US&page=${page}`
+        let url = `${urlDiscover}?api_key=${API_KEY}&language=en-US&page=${page}`
         filterYear && (url += `&primary_release_year=${filterYear}`)
         filterGenreById && (url += `&with_genres=${filterGenreById}`)
         return url
@@ -101,17 +112,18 @@ export default defineComponent({
 
     onMounted(() => {
       getDataMovies()
+      checkUser()
     })
 
     const clickSearch = () => {
-      state.useFilter = false
+      useFilter.value = false
       state.page = 1
-      state.dataMovies = []
+      dataMovies.value = []
       getDataMovies()
     }
 
     watchEffect(() => {
-      state.totalPages == state.page ? state.disableBtnMore = true : state.disableBtnMore = false
+      state.totalPages == state.page ? disableBtnMore.value = true : disableBtnMore.value = false
     }, [state.page])
 
     const openDetail = (movie) => {
@@ -119,10 +131,10 @@ export default defineComponent({
     }
 
     const executeFilter = () => {
-      state.useFilter = true
+      useFilter.value = true
       let { filterYear, filterGenreById } = state 
       if (filterYear || filterGenreById) {
-        state.dataMovies = []
+        dataMovies.value = []
         getDataMovies()
       }
     }
@@ -131,15 +143,29 @@ export default defineComponent({
       state.filterGenreById = id
     }
 
+    const clickLogin = (user) => {
+      localStorage.setItem('userSemovies', JSON.stringify(user))
+      checkUser()
+    }
+
+    const checkUser = () => {
+      let user = localStorage.getItem('userSemovies') ? JSON.parse(localStorage.getItem('userSemovies')) : user = {}
+      user.username == dummyUser.username && user.password == dummyUser.password ? isLoggedIn.value = true : isLoggedIn.value = false
+    }
+
     return {
       state,
+      dataMovies,
       setYearRelease,
+      disableBtnMore,
       clickMore,
       clickSearch,
       paramSearch,
       openDetail,
       executeFilter,
-      chooseGenre
+      chooseGenre,
+      isLoggedIn,
+      clickLogin
     }
   }
 })
