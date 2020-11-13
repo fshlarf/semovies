@@ -89,7 +89,6 @@ export default defineComponent({
         }
         &__genre {
             display: flex;
-            align-content: center;
             justify-content: space-between;
             cursor: pointer;
             img {
