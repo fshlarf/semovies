@@ -33,6 +33,13 @@ $ yarn generate
 
 ```
 
+Credentials used in this web
+``` bash
+$ Username: hello
+$ Password: hell123
+
+```
+
 <b>Stacks</b>
 - Vue Js
 - Nuxt Js
