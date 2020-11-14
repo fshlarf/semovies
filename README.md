@@ -1,6 +1,6 @@
 # Semovies
 
-> Semovies - Simple Web for Refences Movies.
+> Semovies - Simple Web for Your Refences Movies.
 > It's been deployed on github.io. Check this project in production mode by click this link [https://fshlarf.github.io/semovies-id/](https://fshlarf.github.io/semovies-id/)
 
 ## Build Setup
