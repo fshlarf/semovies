@@ -36,7 +36,7 @@ $ yarn generate
 Credentials used in this web
 ``` bash
 $ Username: hello
-$ Password: hell123
+$ Password: hello123
 
 ```
 
