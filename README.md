@@ -46,7 +46,7 @@ $ Password: hell123
 - Composition API
 - Axios
 - Webpack
-- tailwindcss
+- Tailwindcss
 - SCSS
 
 <b>API Source</b>
