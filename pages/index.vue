@@ -23,6 +23,7 @@
               @input-filter-year="state.filterYear = arguments[0]"
               @filter-click="executeFilter"
               @click-genre="chooseGenre"
+              @click-sort="chooseSort"
             />
           </div>
         </div>
@@ -97,6 +98,7 @@ export default defineComponent({
         let url = `${urlDiscover}?api_key=${API_KEY}&language=en-US&page=${page}`
         filterYear && (url += `&primary_release_year=${filterYear}`)
         filterGenreById && (url += `&with_genres=${filterGenreById}`)
+        sortBy && (url += `&sort_by=${sortBy}`)
         return url
       }
     }
@@ -132,8 +134,8 @@ export default defineComponent({
 
     const executeFilter = () => {
       useFilter.value = true
-      let { filterYear, filterGenreById } = state 
-      if (filterYear || filterGenreById) {
+      let { filterYear, filterGenreById, sortBy } = state 
+      if (filterYear || filterGenreById || sortBy) {
         dataMovies.value = []
         getDataMovies()
       }
@@ -141,6 +143,10 @@ export default defineComponent({
 
     const chooseGenre = (id) => {
       state.filterGenreById = id
+    }
+
+    const chooseSort = (code) => {
+      state.sortBy = code
     }
 
     const clickLogin = (user) => {
@@ -164,6 +170,7 @@ export default defineComponent({
       openDetail,
       executeFilter,
       chooseGenre,
+      chooseSort,
       isLoggedIn,
       clickLogin
     }
