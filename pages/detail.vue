@@ -31,6 +31,8 @@ export default defineComponent({
             dataMovie: {}
         })
 
+        const API_KEY = 'eb9ff522676fd1e57fbd5f7ebd4fe38d'
+
         onMounted(() => {
             getDataMovie()
         }, [])
@@ -39,9 +41,8 @@ export default defineComponent({
 
         const getDataMovie = async () => {
             try {
-                const resMovie = await axios.get(`https://api.themoviedb.org/3/movie/${idMovie}?api_key=eb9ff522676fd1e57fbd5f7ebd4fe38d`)
+                const resMovie = await axios.get(`https://api.themoviedb.org/3/movie/${idMovie}?api_key=${API_KEY}`)
                 state.dataMovie = resMovie.data
-                console.log(resMovie.data);
             } catch (err) {
                 console.log(err)
             }
